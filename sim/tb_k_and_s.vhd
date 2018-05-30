@@ -30,12 +30,12 @@ architecture behavior of tb_k_and_s is
   --K and S Inputs
   signal rst_n         : std_logic := '0';
   signal clk           : std_logic := '0';
-  signal ram_data_from : std_logic_vector(15 downto 0);
+  signal data_from_ram : std_logic_vector(15 downto 0);
 
   --K and S Outputs
   signal halt             : std_logic;
   signal ram_addr         : std_logic_vector(4 downto 0);
-  signal ram_data_to      : std_logic_vector(15 downto 0);
+  signal data_to_ram      : std_logic_vector(15 downto 0);
   signal ram_write_enable : std_logic;
 
   -- RAM Control Signals
@@ -54,8 +54,8 @@ begin
     clk          => clk,
     halt         => halt,
     addr         => ram_addr,
-    data_in      => ram_data_from,
-    data_out     => ram_data_to,
+    data_in      => data_from_ram,
+    data_out     => data_to_ram,
     write_enable => ram_write_enable
     );
 
@@ -67,8 +67,8 @@ begin
     port map (
       clk            => clk,
       addr           => ram_addr,
-      data_in        => ram_data_to,
-      data_out       => ram_data_from,
+      data_in        => data_to_ram,
+      data_out       => data_from_ram,
       write_enable   => ram_write_enable,
       operation_mode => ram_operation,
       done           => ram_done,

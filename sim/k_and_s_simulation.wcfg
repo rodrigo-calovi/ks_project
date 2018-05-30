@@ -43,18 +43,18 @@
       <obj_property name="ObjectShortName">ram_addr[4:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/tb_k_and_s/ram_data_to">
-      <obj_property name="ElementShortName">ram_data_to[15:0]</obj_property>
-      <obj_property name="ObjectShortName">ram_data_to[15:0]</obj_property>
-      <obj_property name="Radix">HEXRADIX</obj_property>
-   </wvobject>
    <wvobject type="logic" fp_name="/tb_k_and_s/ram_write_enable">
       <obj_property name="ElementShortName">ram_write_enable</obj_property>
       <obj_property name="ObjectShortName">ram_write_enable</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/tb_k_and_s/ram_data_from">
-      <obj_property name="ElementShortName">ram_data_from[15:0]</obj_property>
-      <obj_property name="ObjectShortName">ram_data_from[15:0]</obj_property>
+   <wvobject type="array" fp_name="/tb_k_and_s/data_to_ram">
+      <obj_property name="ElementShortName">data_to_ram[15:0]</obj_property>
+      <obj_property name="ObjectShortName">data_to_ram[15:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/tb_k_and_s/data_from_ram">
+      <obj_property name="ElementShortName">data_from_ram[15:0]</obj_property>
+      <obj_property name="ObjectShortName">data_from_ram[15:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/tb_k_and_s/ram_operation">

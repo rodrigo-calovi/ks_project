@@ -50,7 +50,7 @@ sub check_value()
     print "         Memory will be set to zero at address $addr\n";
     $mem = 0;
   }
-  $mem = 65536 + $mem if ($mem < 0); ## making complement to keep positive values only
+  $mem = 0x10000 + $mem if ($mem < 0); ## making complement to keep positive values only
   return $mem;
 }
 
@@ -75,7 +75,7 @@ sub check_reg()
     print "Warning: You did not provid a valid register at line $line in command $comm\n";
     print "         R0 will be used instead.\n";
   } else {
-    $reg =~ s/r//;
+    $reg =~ s/[rR]//;
     $res = $reg;
     print "***DBG register $res\n" if ($debug);
   }
@@ -120,37 +120,37 @@ sub process_asm()
       print "line: $line NOP\n" if ($debug);
     } elsif ($comm eq "halt") {
       print "line: $line HALT\n" if ($debug);
-      $result = 65535; ## FFFFh
+      $result = 0xFFFF; ## FFFFh
     } elsif ($comm eq "bneg") {
       print "line $line BNEG $args[1]\n" if ($debug);
-      $result = 768 + &check_addr_mem($args[1], "BNEG", $line_file);
+      $result = 0x0300 + &check_addr_mem($args[1], "BNEG", $line_file);
     } elsif ($comm eq "bzero") {
       print "line $line BZERO $args[1]\n" if ($debug);
-      $result = 512 + &check_addr_mem($args[1], "BZERO", $line_file);
+      $result = 0x0200 + &check_addr_mem($args[1], "BZERO", $line_file);
     } elsif ($comm eq "branch") {
       print "line $line BRANCH $args[1]\n" if ($debug);
-      $result = 256 + &check_addr_mem($args[1], "BRANCH", $line_file);
+      $result = 0x0100 + &check_addr_mem($args[1], "BRANCH", $line_file);
     } elsif ($comm eq "move") {
       print "line $line MOVE $args[1] $args[2]\n" if ($debug);
-      $result = 37120 + &check_reg($args[1], "MOVE", $line_file)*4 + &check_reg($args[2], "MOVE", $line_file);
+      $result = 0x9100 + &check_reg($args[1], "MOVE", $line_file)*4 + &check_reg($args[2], "MOVE", $line_file);
     } elsif ($comm eq "load") {
       print "line $line LOAD $args[1] $args[2]\n" if ($debug);
-      $result = 33024 + &check_reg($args[1])*32 + &check_addr_mem($args[2], "LOAD", $line_file);
+      $result = 0x8100 + (&check_reg($args[1]) * 32) + &check_addr_mem($args[2], "LOAD", $line_file);
     } elsif ($comm eq "store") {        
       print "line $line STORE $args[1] $args[2]\n" if ($debug);
-      $result = 33280 + &check_reg($args[2])*32 + &check_addr_mem($args[1], "STORE", $line_file);
+      $result = 0x8200 + &check_reg($args[2])*32 + &check_addr_mem($args[1], "STORE", $line_file);
     } elsif ($comm eq "add") {        
       print "line $line ADD $args[1] $args[2] $args[3]\n" if ($debug);
-      $result = 37120 + &check_reg($args[1], "ADD", $line_file)*16 + &check_reg($args[2], "ADD", $line_file)*4 + &check_reg($args[3], "ADD", $line_file);
+      $result = 0xA100 + &check_reg($args[1], "ADD", $line_file)*16 + &check_reg($args[2], "ADD", $line_file)*4 + &check_reg($args[3], "ADD", $line_file);
     } elsif ($comm eq "sub") {        
       print "line $line SUB $args[1] $args[2] $args[3]\n" if ($debug);
-      $result = 37120 + &check_reg($args[1], "SUB", $line_file)*16 + &check_reg($args[2], "SUB", $line_file)*4 + &check_reg($args[3], "SUB", $line_file);
+      $result = 0xA200 + &check_reg($args[1], "SUB", $line_file)*16 + &check_reg($args[2], "SUB", $line_file)*4 + &check_reg($args[3], "SUB", $line_file);
     } elsif ($comm eq "and") {        
       print "line $line AND $args[1] $args[2] $args[3]\n" if ($debug);
-      $result = 37120 + &check_reg($args[1], "AND", $line_file)*16 + &check_reg($args[2], "AND", $line_file)*4 + &check_reg($args[3], "AND", $line_file);
+      $result = 0xA300 + &check_reg($args[1], "AND", $line_file)*16 + &check_reg($args[2], "AND", $line_file)*4 + &check_reg($args[3], "AND", $line_file);
     } elsif ($comm eq "or") {        
       print "line $line OR $args[1] $args[2] $args[3]\n" if ($debug);
-      $result = 37120 + &check_reg($args[1], "OR", $line_file)*16 + &check_reg($args[2], "OR", $line_file)*4 + &check_reg($args[3], "OR", $line_file);
+      $result = 0xA000 + &check_reg($args[1], "OR", $line_file)*16 + &check_reg($args[2], "OR", $line_file)*4 + &check_reg($args[3], "OR", $line_file);
     } else {
       print "Warning: Invalid command at line $line_file \"$command\"\n";
       print "         Memory will set to zero at address $line\n"; 
@@ -159,6 +159,8 @@ sub process_asm()
     if ($line < 32)
     {
       printf $hex "%04X\n", $result;
+
+      printf "%04X\n", $result if($debug);
     } else {
       "Warning: Memory full!! Ignoring command \"$command\"\n";
     }
