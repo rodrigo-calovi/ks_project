@@ -77,7 +77,7 @@ begin
       );
 
   -- Clock process definitions
-  clk_process : process
+  clk_100Mhz : process
   begin
     clk <= '0';
     wait for clk_period/2;
@@ -87,7 +87,7 @@ begin
 
 
   -- Stimulus process
-  testbench_process_main : process
+  testbench_control : process
     variable output_line_v : line;
   begin
     -- hold reset state until memory is loaded
