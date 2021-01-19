@@ -13,7 +13,8 @@
 -- Revision 0.01 - File Created
 --          0.02 - moving to Vivado 2017.3
 -- Additional Comments: 
---
+-- Para avaliação de Sistemas Digitais:
+-- Luana Santana, Michele Liese e Rodrigo Calovi
 ----------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
