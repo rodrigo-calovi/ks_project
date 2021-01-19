@@ -14,7 +14,7 @@
 -- Revision 0.01 - File Created
 --          0.02 - Moving to Vivado 2017.3
 -- Additional Comments: 
--- Trabalho de continuado para avaliação de Sistemas Digitais
+-- Para avaliação de Sistemas Digitais:
 -- Luana Santana, Michele Liese e Rodrigo Calovi
 ----------------------------------------------------------------------------------
 library IEEE;
