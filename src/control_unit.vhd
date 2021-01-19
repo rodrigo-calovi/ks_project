@@ -12,7 +12,8 @@
 -- Revision: 
 -- Revision 0.01 - File Created
 --          0.02 - moving to Vivado 2017.3
--- Additional Comments: 
+-- Additional Comments:
+--
 -- Para avaliação de Sistemas Digitais:
 -- Luana Santana, Michele Liese e Rodrigo Calovi
 ----------------------------------------------------------------------------------
