@@ -12,7 +12,11 @@
 -- Revision: 
 -- Revision 0.01 - File Created
 --          0.02 - Moving Vivado 2017.3
+<<<<<<< HEAD
 -- Additional Comments: 
+=======
+-- Additional Comments:
+>>>>>>> criacao
 --
 -- Para avaliação de Sistemas Digitais:
 -- Luana Santana, Michele Liese e Rodrigo Calovi
@@ -21,6 +25,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 library work;
 use work.k_and_s_pkg.all;
+use IEEE.STD_LOGIC_UNSIGNED.all;
 
 entity data_path is
   port (
@@ -48,7 +53,8 @@ end data_path;
 
 
 architecture rtl of data_path is
-
+    
+    -- receptores de endereço
     signal instruction : std_logic_vector (15 downto 0);
     signal a_addr : std_logic_vector (1 downto 0); 
     signal b_addr : std_logic_vector (1 downto 0);
@@ -68,38 +74,53 @@ architecture rtl of data_path is
     -- saída do MUX (RAM ou ULA)
     signal bus_C : std_logic_vector (15 downto 0);
     
-    -- saida dA ULA    
+    -- saida da ULA para bus_c   
     signal ula_out : std_logic_vector (15 downto 0);
+    
+    -- saida da ULA para flag_reg
+    signal zero_op_flag : std_logic;
+    signal neg_op_flag : std_logic;
+    signal unsigned_overflow_flag : std_logic;
+    signal signed_overflow_flag : std_logic;
+    
+    -- entrada do PC
+    signal pc_in : std_logic_vector (4 downto 0);
 
-
+    -- saída do PC
+    signal program_counter : std_logic_vector (4 downto 0);
 
 begin
 
 
 
 IR : process (clk)                                          -- processo IR
+    
     begin
+    
         if (ir_enable = '1') then                           -- verifica se pode passar a instrução ou não, depende do ir_enable
         instruction <= data_in;                             -- passa a instrução data_in para instruction
         end if;
-    end process IR;
+    
+end process IR;
     
 
 
 DECODE : process (instruction)                              -- processo DECODE
+    
     begin
+       
         a_addr <= "00";                                     -- VERIFICAR
         b_addr <= "00";                                     -- VERIFICAR
         c_addr <= "00";                                     -- VERIFICAR
         mem_addr <= "00000";                                -- VERIFICAR
         decoded_instruction <= I_NOP;                       -- VERIFICAR
-        
+
         
         -----------         Other Instructions:         -----------
         
         if(instruction(15 downto 8) = "11111111") then      -- HALT
-            decoded_instruction <= I_HALT;                  -- decoded_instruction recebe I_HALT
-            
+            decoded_instruction <= I_HALT;                  -- decoded_instruction recebe I_HALT          
+  
             
         -----------  Arithmetic and Logic Instructions:  -----------
         
@@ -169,10 +190,11 @@ DECODE : process (instruction)                              -- processo DECODE
                     
         end if;
 
-    end process DECODE;
+end process DECODE;
     
     
-    BANCO_DE_REGISTRADORES : process (clk)                      -- processo BANCO_DE_REGISTRADORES
+    
+BANCO_DE_REGISTRADORES : process (clk)                      -- processo BANCO_DE_REGISTRADORES
 
     begin
     
@@ -206,8 +228,68 @@ DECODE : process (instruction)                              -- processo DECODE
 end process BANCO_DE_REGISTRADORES;
     
 
+    
+    
+ULA : process (bus_a, bus_b, operation)                     -- processo ULA 
+        
+    begin
+        
+        if(operation = "00") then                           -- SOMA
+            ula_out <= bus_a + bus_b;                       -- ula_out recebe a soma de bus_a com bus_b
+            
+            if (bus_a(15) = '0' AND bus_b(15) = '0') AND ula_out(15) = '1' then
+                signed_overflow_flag <= '1';                -- signed_overflow_flag recebe 1
+                
+            elsif (bus_a(15) = '1' AND bus_b(15) = '1') AND ula_out(15) = '0' then
+                signed_overflow_flag <= '1';                -- signed_overflow_flag recebe 1
+                
+            elsif (bus_a(15) = '0' AND bus_b(15) = '1') AND (bus_a >= (NOT bus_b) - "1") then
+               unsigned_overflow_flag <= '1';               -- unsigned_overflow_flag recebe 1
+               
+            elsif (bus_a(15) = '1' AND bus_b(15) = '0') AND (bus_b >= (NOT bus_a) - "1") then
+               unsigned_overflow_flag <= '1';               -- unsigned_overflow_flag recebe 1
+                
+            elsif (bus_a(15)='1' and bus_b(15)='1') then
+               unsigned_overflow_flag <= '1';               -- unsigned_overflow_flag recebe 1
+               
+            end if;
+            
+               
+        elsif(operation = "01") then                        -- SUB
+            ula_out <= bus_b - bus_a;                       -- ula_out recebe a subtração de bus_a com bus_b
+            
+            if(bus_a(15) = '0' AND bus_b(15) = '1') AND ula_out(15) = '1' then 
+            signed_overflow_flag <= '1';                    -- signed_overflow_flag recebe 1
+                
+            elsif (bus_a(15) = '1' AND bus_b(15) = '0') AND ula_out(15) = '0' then
+            signed_overflow_flag <= '1';                    -- signed_overflow_flag recebe 1
+            
+            elsif (bus_a(15) = '0' and bus_b(15) = '0') and (bus_a >= bus_b) then
+            unsigned_overflow_flag <= '1';                  -- unsigned_overflow_flag recebe 1
+            
+            elsif (bus_a(15) = '1' and bus_b(15) = '1') and ((not bus_a) - "1" <= (not bus_b)-1) then
+            unsigned_overflow_flag <= '1';                  -- unsigned_overflow_flag recebe 1
+            
+            elsif (bus_a(15)='1' and bus_b(15)='0') then
+            unsigned_overflow_flag <= '1';                  -- unsigned_overflow_flag recebe 1
+            
+            end if;
+            
+            
+        elsif(operation = "10") then                        -- AND    
+            ula_out <= bus_a AND bus_b;                     -- ula_out recebe a and de bus_a com bus_b
+        
+        
+        else                                                -- OR
+            ula_out <= bus_a OR bus_b;                      -- ula_out recebe a or de bus_a com bus_b 
+        
+        end if;
 
-WRITE_REG_EN : process (c_sel, data_in, ula_out)            -- processo WRITE_REG_EN
+end process ULA;
+
+
+
+C_SEL_MUX : process (c_sel, data_in, ula_out)               -- processo C_SEL_MUX
        
     begin
         
@@ -219,9 +301,64 @@ WRITE_REG_EN : process (c_sel, data_in, ula_out)            -- processo WRITE_RE
          
         end if;
         
-end process WRITE_REG_EN;
+end process C_SEL_MUX;
 
+
+
+zero_op_flag <= '1' when ula_out = X"0000" else '0';
+neg_op_flag <= '1' when ula_out(15) = '1';
     
     
+    
+FLAG_ENABLE : process (clk)
+
+    begin
+    
+        zero_op <= '0';
+        neg_op <= '0';
+        signed_overflow <= '0';
+        unsigned_overflow <= '0';
+        
+        if (flags_reg_enable = '1') then                    -- verifica se o flags_reg_enable está habilitado
+            zero_op <= zero_op_flag;                        -- zero_op recebe de zero_op_flag
+            neg_op <= neg_op_flag;                          -- neg_op recebe de neg_op_flag
+            signed_overflow <= signed_overflow_flag;        -- signed_overflow recebe de signed_overflow_flag
+            unsigned_overflow <= unsigned_overflow_flag;    -- unsigned_overflow recebe de unsigned_overflow_flag
+        end if;
+    
+end process FLAG_ENABLE;
+
+
+
+BRANCH_MUX : process (branch, program_counter, mem_addr)    -- processo BRANCH_MUX
+    
+    begin
+        if (branch = '0') then                              -- verifica se o branch é 0
+            pc_in <= program_counter + 1;                   -- pc_in recebe program_counter somando 1
+            
+        else
+            pc_in <= mem_addr;                              -- pc_in recebe mem_addr
+            
+        end if;
+        
+end process BRANCH_MUX;
+
+
+
+PC : process (clk)                                          -- processo PC
+    
+    begin
+        
+        if (rst_n = '0') then                               -- verifica se o rst_n voltou a ser 0
+            program_counter <= "00000";                     -- program_counter recebe 00000 e volta ao início
+            
+        elsif (pc_enable = '1') then                        -- verifica se o pc_enable está habilitado
+            program_counter <= pc_in;                       -- program_counter recebe pc_in
+            
+        end if;
+        
+end process PC;
+
+
 end rtl;
 
