@@ -48,11 +48,28 @@ end data_path;
 
 architecture rtl of data_path is
 
-signal instruction : std_logic_vector (15 downto 0);
-signal a_addr : std_logic_vector (1 downto 0); 
-signal b_addr : std_logic_vector (1 downto 0);
-signal c_addr : std_logic_vector (1 downto 0);
-signal mem_addr : std_logic_vector (4 downto 0);
+    signal instruction : std_logic_vector (15 downto 0);
+    signal a_addr : std_logic_vector (1 downto 0); 
+    signal b_addr : std_logic_vector (1 downto 0);
+    signal c_addr : std_logic_vector (1 downto 0);
+    signal mem_addr : std_logic_vector (4 downto 0);
+
+    -- registradores R0, R1, R2 e R3
+    signal reg_0 : std_logic_vector (15 downto 0);
+    signal reg_1 : std_logic_vector (15 downto 0);
+    signal reg_2 : std_logic_vector (15 downto 0);
+    signal reg_3 : std_logic_vector (15 downto 0);
+
+    -- entrada da ULA
+    signal bus_a : std_logic_vector (15 downto 0);
+    signal bus_b : std_logic_vector (15 downto 0);
+    
+    -- saída do MUX (RAM ou ULA)
+    signal bus_C : std_logic_vector (15 downto 0);
+    
+    -- saida dA ULA    
+    signal ula_out : std_logic_vector (15 downto 0);
+
 
 
 begin
@@ -152,6 +169,57 @@ DECODE : process (instruction)                              -- processo DECODE
         end if;
 
     end process DECODE;
+    
+    
+    BANCO_DE_REGISTRADORES : process (clk)                      -- processo BANCO_DE_REGISTRADORES
+
+    begin
+    
+        case  a_addr is                                     -- verifica o endereço que está em a_addr
+            when "00" => bus_a <= reg_0;                    -- bus_a recebe o que está em reg_0
+            when "01" => bus_a <= reg_1;                    -- bus_a recebe o que está em reg_1
+            when "10" => bus_a <= reg_2;                    -- bus_a recebe o que está em reg_2
+            when others => bus_a <= reg_3;                  -- bus_a recebe o que está em reg_3
+        end case;
+       
+        case  b_addr is                                     -- verifica o endereço que está em b_addr
+            when "00" => bus_b <= reg_0;                    -- bus_b recebe o que está em reg_0
+            when "01" => bus_b <= reg_1;                    -- bus_b recebe o que está em reg_1
+            when "10" => bus_b <= reg_2;                    -- bus_b recebe o que está em reg_2
+            when others => bus_b <= reg_3;                  -- bus_b recebe o que está em reg_3
+        end case;
+       
+        if (write_reg_enable = '1') then                    -- verifica se o write_reg_enable está habilitado para acessar os registradores 
+       
+            case  c_addr is                                 -- verifica o endereço que está em c_addr
+                when "00" => reg_0 <= bus_c;                -- reg_0 recebe o que está em bus_c
+                when "01" => reg_1 <= bus_c;                -- reg_1 recebe o que está em bus_c
+                when "10" => reg_2 <= bus_c;                -- reg_2 recebe o que está em bus_c
+                when others => reg_3 <= bus_c;              -- reg_3 recebe o que está em bus_c
+            end case;   
+       
+       end if;
+       
+       data_out <= bus_a;                                   -- data_out recebe o que está em bus_a
+    
+end process BANCO_DE_REGISTRADORES;
+    
+
+
+WRITE_REG_EN : process (c_sel, data_in, ula_out)            -- processo WRITE_REG_EN
+       
+    begin
+        
+        if (c_sel='0') then                                 -- verifica se c_sel está habilitado para a RAM
+            bus_c <= data_in;                               -- bus_c recebe data_in
+
+        else
+            bus_c <= ula_out;                               -- bus_c recebe ula_out
+         
+        end if;
+        
+end process WRITE_REG_EN;
+
     
     
 end rtl;
