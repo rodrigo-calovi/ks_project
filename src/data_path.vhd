@@ -356,5 +356,19 @@ PC : process (clk)                                          -- processo PC
 end process PC;
 
 
-end rtl;
 
+ADDR_SEL_MUX : process (addr_sel, program_counter, mem_addr)-- processo ADDR_SEL_MUX 
+    
+    begin
+        
+        if (addr_sel = '0') then                            -- verifica se addr_sel é 0
+            ram_addr <= mem_addr;                           -- ram_addr recebe mem_addr
+        
+        else
+            ram_addr <= program_counter;                    -- ram_addr recebe program_counter
+        
+        end if;
+        
+end process ADDR_SEL_MUX;
+
+end rtl;
