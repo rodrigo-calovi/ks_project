@@ -301,6 +301,60 @@ end process C_SEL_MUX;
 
 
 
+zero_op_flag <= '1' when ula_out = X"0000" else '0';
+neg_op_flag <= '1' when ula_out(15) = '1';
+    
+    
+    
+FLAG_ENABLE : process (clk)
+
+    begin
+    
+        zero_op <= '0';
+        neg_op <= '0';
+        signed_overflow <= '0';
+        unsigned_overflow <= '0';
+        
+        if (flags_reg_enable = '1') then                    -- verifica se o flags_reg_enable está habilitado
+            zero_op <= zero_op_flag;                        -- zero_op recebe de zero_op_flag
+            neg_op <= neg_op_flag;                          -- neg_op recebe de neg_op_flag
+            signed_overflow <= signed_overflow_flag;        -- signed_overflow recebe de signed_overflow_flag
+            unsigned_overflow <= unsigned_overflow_flag;    -- unsigned_overflow recebe de unsigned_overflow_flag
+        end if;
+    
+end process FLAG_ENABLE;
+
+
+
+BRANCH_MUX : process (branch, program_counter, mem_addr)    -- processo BRANCH_MUX
+    
+    begin
+        if (branch = '0') then                              -- verifica se o branch é 0
+            pc_in <= program_counter + 1;                   -- pc_in recebe program_counter somando 1
+            
+        else
+            pc_in <= mem_addr;                              -- pc_in recebe mem_addr
+            
+        end if;
+        
+end process BRANCH_MUX;
+
+
+
+PC : process (clk)                                          -- processo PC
+    
+    begin
+        
+        if (rst_n = '0') then                               -- verifica se o rst_n voltou a ser 0
+            program_counter <= "00000";                     -- program_counter recebe 00000 e volta ao início
+            
+        elsif (pc_enable = '1') then                        -- verifica se o pc_enable está habilitado
+            program_counter <= pc_in;                       -- program_counter recebe pc_in
+            
+        end if;
+        
+end process PC;
+
 
 end rtl;
 
