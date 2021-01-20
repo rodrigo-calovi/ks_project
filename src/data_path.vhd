@@ -12,7 +12,8 @@
 -- Revision: 
 -- Revision 0.01 - File Created
 --          0.02 - Moving Vivado 2017.3
--- Additional Comments: 
+-- Additional Comments:
+--
 -- Para avaliação de Sistemas Digitais:
 -- Luana Santana, Michele Liese e Rodrigo Calovi
 ----------------------------------------------------------------------------------
@@ -47,7 +48,8 @@ end data_path;
 
 
 architecture rtl of data_path is
-
+    
+    -- receptores de endereço
     signal instruction : std_logic_vector (15 downto 0);
     signal a_addr : std_logic_vector (1 downto 0); 
     signal b_addr : std_logic_vector (1 downto 0);
@@ -67,38 +69,47 @@ architecture rtl of data_path is
     -- saída do MUX (RAM ou ULA)
     signal bus_C : std_logic_vector (15 downto 0);
     
-    -- saida dA ULA    
+    -- saida da ULA para bus_c   
     signal ula_out : std_logic_vector (15 downto 0);
-
-
+    
+    -- saida da ULA para flag_reg
+    signal zero_op_flag : std_logic;
+    signal neg_op_flag : std_logic;
+    signal unsigned_overflow_flag : std_logic;
+    signal signed_overflow_flag : std_logic;
 
 begin
 
 
 
 IR : process (clk)                                          -- processo IR
+    
     begin
+    
         if (ir_enable = '1') then                           -- verifica se pode passar a instrução ou não, depende do ir_enable
         instruction <= data_in;                             -- passa a instrução data_in para instruction
         end if;
-    end process IR;
+    
+end process IR;
     
 
 
 DECODE : process (instruction)                              -- processo DECODE
+    
     begin
+       
         a_addr <= "00";                                     -- VERIFICAR
         b_addr <= "00";                                     -- VERIFICAR
         c_addr <= "00";                                     -- VERIFICAR
         mem_addr <= "00000";                                -- VERIFICAR
         decoded_instruction <= I_NOP;                       -- VERIFICAR
-        
+
         
         -----------         Other Instructions:         -----------
         
         if(instruction(15 downto 8) = "11111111") then      -- HALT
-            decoded_instruction <= I_HALT;                  -- decoded_instruction recebe I_HALT
-            
+            decoded_instruction <= I_HALT;                  -- decoded_instruction recebe I_HALT          
+  
             
         -----------  Arithmetic and Logic Instructions:  -----------
         
@@ -168,10 +179,11 @@ DECODE : process (instruction)                              -- processo DECODE
                     
         end if;
 
-    end process DECODE;
+end process DECODE;
     
     
-    BANCO_DE_REGISTRADORES : process (clk)                      -- processo BANCO_DE_REGISTRADORES
+    
+BANCO_DE_REGISTRADORES : process (clk)                      -- processo BANCO_DE_REGISTRADORES
 
     begin
     
@@ -222,5 +234,50 @@ end process WRITE_REG_EN;
 
     
     
+ULA : process (bus_a, bus_b, operation)                     -- processo ULA 
+        
+    begin
+        
+        if(operation = "00") then                           -- SOMA
+            ula_out <= bus_a + bus_b;
+            
+            if (bus_a(15) = '0' AND bus_b(15) = '0') AND ula_out(15) = '1' then
+                signed_overflow_flag <= '1';
+                
+            elsif (bus_a(15) = '1' AND bus_b(15) = '1') AND ula_out(15) = '0' then
+                signed_overflow_flag <= '1';
+                
+            elsif (bus_a(15)='1' and bus_b(15)='1') then
+               unsigned_overflow_flag <= '1';
+               
+            end if;
+            
+               
+        elsif(operation = "01") then                        -- SUB
+            ula_out <= bus_b - bus_a;
+            
+            if(bus_a(15) = '0' AND bus_b(15) = '1') AND ula_out(15) = '1' then 
+            signed_overflow_flag <= '1';
+                
+            elsif (bus_a(15) = '1' AND bus_b(15) = '0') AND ula_out(15) = '0' then
+            signed_overflow_flag <= '1';    
+            
+            elsif (bus_a(15)='1' and bus_b(15)='0') then
+            unsigned_overflow_flag <= '1';
+            
+            end if;
+            
+            
+        elsif(operation = "10") then                        -- AND    
+            ula_out <= bus_a AND bus_b;
+        
+        
+        else
+            ula_out <= bus_a OR bus_b;                      -- OR 
+        
+        end if;
+
+end process ULA;
+
 end rtl;
 
