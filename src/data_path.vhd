@@ -12,13 +12,8 @@
 -- Revision: 
 -- Revision 0.01 - File Created
 --          0.02 - Moving Vivado 2017.3
-<<<<<<< HEAD
 -- Additional Comments: 
-=======
--- Additional Comments:
->>>>>>> criacao
---
--- Para avaliação de Sistemas Digitais:
+-- Para avaliaÃ§Ã£o de Sistemas Digitais:
 -- Luana Santana, Michele Liese e Rodrigo Calovi
 ----------------------------------------------------------------------------------
 library IEEE;
@@ -54,7 +49,7 @@ end data_path;
 
 architecture rtl of data_path is
     
-    -- receptores de endereço
+    -- receptores de endereÃ§o
     signal instruction : std_logic_vector (15 downto 0);
     signal a_addr : std_logic_vector (1 downto 0); 
     signal b_addr : std_logic_vector (1 downto 0);
@@ -71,7 +66,7 @@ architecture rtl of data_path is
     signal bus_a : std_logic_vector (15 downto 0);
     signal bus_b : std_logic_vector (15 downto 0);
     
-    -- saída do MUX (RAM ou ULA)
+    -- saÃ­da do MUX (RAM ou ULA)
     signal bus_C : std_logic_vector (15 downto 0);
     
     -- saida da ULA para bus_c   
@@ -86,7 +81,7 @@ architecture rtl of data_path is
     -- entrada do PC
     signal pc_in : std_logic_vector (4 downto 0);
 
-    -- saída do PC
+    -- saÃ­da do PC
     signal program_counter : std_logic_vector (4 downto 0);
 
 begin
@@ -97,8 +92,8 @@ IR : process (clk)                                          -- processo IR
     
     begin
     
-        if (ir_enable = '1') then                           -- verifica se pode passar a instrução ou não, depende do ir_enable
-        instruction <= data_in;                             -- passa a instrução data_in para instruction
+        if (ir_enable = '1') then                           -- verifica se pode passar a instruÃ§Ã£o ou nÃ£o, depende do ir_enable
+        instruction <= data_in;                             -- passa a instruÃ§Ã£o data_in para instruction
         end if;
     
 end process IR;
@@ -198,32 +193,32 @@ BANCO_DE_REGISTRADORES : process (clk)                      -- processo BANCO_DE
 
     begin
     
-        case  a_addr is                                     -- verifica o endereço que está em a_addr
-            when "00" => bus_a <= reg_0;                    -- bus_a recebe o que está em reg_0
-            when "01" => bus_a <= reg_1;                    -- bus_a recebe o que está em reg_1
-            when "10" => bus_a <= reg_2;                    -- bus_a recebe o que está em reg_2
-            when others => bus_a <= reg_3;                  -- bus_a recebe o que está em reg_3
+        case  a_addr is                                     -- verifica o endereÃ§o que estÃ¡ em a_addr
+            when "00" => bus_a <= reg_0;                    -- bus_a recebe o que estÃ¡ em reg_0
+            when "01" => bus_a <= reg_1;                    -- bus_a recebe o que estÃ¡ em reg_1
+            when "10" => bus_a <= reg_2;                    -- bus_a recebe o que estÃ¡ em reg_2
+            when others => bus_a <= reg_3;                  -- bus_a recebe o que estÃ¡ em reg_3
         end case;
        
-        case  b_addr is                                     -- verifica o endereço que está em b_addr
-            when "00" => bus_b <= reg_0;                    -- bus_b recebe o que está em reg_0
-            when "01" => bus_b <= reg_1;                    -- bus_b recebe o que está em reg_1
-            when "10" => bus_b <= reg_2;                    -- bus_b recebe o que está em reg_2
-            when others => bus_b <= reg_3;                  -- bus_b recebe o que está em reg_3
+        case  b_addr is                                     -- verifica o endereÃ§o que estÃ¡ em b_addr
+            when "00" => bus_b <= reg_0;                    -- bus_b recebe o que estÃ¡ em reg_0
+            when "01" => bus_b <= reg_1;                    -- bus_b recebe o que estÃ¡ em reg_1
+            when "10" => bus_b <= reg_2;                    -- bus_b recebe o que estÃ¡ em reg_2
+            when others => bus_b <= reg_3;                  -- bus_b recebe o que estÃ¡ em reg_3
         end case;
        
-        if (write_reg_enable = '1') then                    -- verifica se o write_reg_enable está habilitado para acessar os registradores 
+        if (write_reg_enable = '1') then                    -- verifica se o write_reg_enable estÃ¡ habilitado para acessar os registradores 
        
-            case  c_addr is                                 -- verifica o endereço que está em c_addr
-                when "00" => reg_0 <= bus_c;                -- reg_0 recebe o que está em bus_c
-                when "01" => reg_1 <= bus_c;                -- reg_1 recebe o que está em bus_c
-                when "10" => reg_2 <= bus_c;                -- reg_2 recebe o que está em bus_c
-                when others => reg_3 <= bus_c;              -- reg_3 recebe o que está em bus_c
+            case  c_addr is                                 -- verifica o endereÃ§o que estÃ¡ em c_addr
+                when "00" => reg_0 <= bus_c;                -- reg_0 recebe o que estÃ¡ em bus_c
+                when "01" => reg_1 <= bus_c;                -- reg_1 recebe o que estÃ¡ em bus_c
+                when "10" => reg_2 <= bus_c;                -- reg_2 recebe o que estÃ¡ em bus_c
+                when others => reg_3 <= bus_c;              -- reg_3 recebe o que estÃ¡ em bus_c
             end case;   
        
        end if;
        
-       data_out <= bus_a;                                   -- data_out recebe o que está em bus_a
+       data_out <= bus_a;                                   -- data_out recebe o que estÃ¡ em bus_a
     
 end process BANCO_DE_REGISTRADORES;
     
@@ -256,7 +251,7 @@ ULA : process (bus_a, bus_b, operation)                     -- processo ULA
             
                
         elsif(operation = "01") then                        -- SUB
-            ula_out <= bus_b - bus_a;                       -- ula_out recebe a subtração de bus_a com bus_b
+            ula_out <= bus_b - bus_a;                       -- ula_out recebe a subtraÃ§Ã£o de bus_a com bus_b
             
             if(bus_a(15) = '0' AND bus_b(15) = '1') AND ula_out(15) = '1' then 
             signed_overflow_flag <= '1';                    -- signed_overflow_flag recebe 1
@@ -293,7 +288,7 @@ C_SEL_MUX : process (c_sel, data_in, ula_out)               -- processo C_SEL_MU
        
     begin
         
-        if (c_sel='0') then                                 -- verifica se c_sel está habilitado para a RAM
+        if (c_sel='0') then                                 -- verifica se c_sel estÃ¡ habilitado para a RAM
             bus_c <= data_in;                               -- bus_c recebe data_in
 
         else
@@ -319,7 +314,7 @@ FLAG_ENABLE : process (clk)
         signed_overflow <= '0';
         unsigned_overflow <= '0';
         
-        if (flags_reg_enable = '1') then                    -- verifica se o flags_reg_enable está habilitado
+        if (flags_reg_enable = '1') then                    -- verifica se o flags_reg_enable estÃ¡ habilitado
             zero_op <= zero_op_flag;                        -- zero_op recebe de zero_op_flag
             neg_op <= neg_op_flag;                          -- neg_op recebe de neg_op_flag
             signed_overflow <= signed_overflow_flag;        -- signed_overflow recebe de signed_overflow_flag
@@ -333,7 +328,7 @@ end process FLAG_ENABLE;
 BRANCH_MUX : process (branch, program_counter, mem_addr)    -- processo BRANCH_MUX
     
     begin
-        if (branch = '0') then                              -- verifica se o branch é 0
+        if (branch = '0') then                              -- verifica se o branch Ã© 0
             pc_in <= program_counter + 1;                   -- pc_in recebe program_counter somando 1
             
         else
@@ -350,9 +345,9 @@ PC : process (clk)                                          -- processo PC
     begin
         
         if (rst_n = '0') then                               -- verifica se o rst_n voltou a ser 0
-            program_counter <= "00000";                     -- program_counter recebe 00000 e volta ao início
+            program_counter <= "00000";                     -- program_counter recebe 00000 e volta ao inÃ­cio
             
-        elsif (pc_enable = '1') then                        -- verifica se o pc_enable está habilitado
+        elsif (pc_enable = '1') then                        -- verifica se o pc_enable estÃ¡ habilitado
             program_counter <= pc_in;                       -- program_counter recebe pc_in
             
         end if;
