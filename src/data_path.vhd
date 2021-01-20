@@ -21,6 +21,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 library work;
 use work.k_and_s_pkg.all;
+use IEEE.STD_LOGIC_UNSIGNED.all;
 
 entity data_path is
   port (
@@ -77,6 +78,12 @@ architecture rtl of data_path is
     signal neg_op_flag : std_logic;
     signal unsigned_overflow_flag : std_logic;
     signal signed_overflow_flag : std_logic;
+    
+    -- entrada do PC
+    signal pc_in : std_logic_vector (4 downto 0);
+
+    -- saída do PC
+    signal program_counter : std_logic_vector (4 downto 0);
 
 begin
 
@@ -217,8 +224,68 @@ BANCO_DE_REGISTRADORES : process (clk)                      -- processo BANCO_DE
 end process BANCO_DE_REGISTRADORES;
     
 
+    
+    
+ULA : process (bus_a, bus_b, operation)                     -- processo ULA 
+        
+    begin
+        
+        if(operation = "00") then                           -- SOMA
+            ula_out <= bus_a + bus_b;                       -- ula_out recebe a soma de bus_a com bus_b
+            
+            if (bus_a(15) = '0' AND bus_b(15) = '0') AND ula_out(15) = '1' then
+                signed_overflow_flag <= '1';                -- signed_overflow_flag recebe 1
+                
+            elsif (bus_a(15) = '1' AND bus_b(15) = '1') AND ula_out(15) = '0' then
+                signed_overflow_flag <= '1';                -- signed_overflow_flag recebe 1
+                
+            elsif (bus_a(15) = '0' AND bus_b(15) = '1') AND (bus_a >= (NOT bus_b) - "1") then
+               unsigned_overflow_flag <= '1';               -- unsigned_overflow_flag recebe 1
+               
+            elsif (bus_a(15) = '1' AND bus_b(15) = '0') AND (bus_b >= (NOT bus_a) - "1") then
+               unsigned_overflow_flag <= '1';               -- unsigned_overflow_flag recebe 1
+                
+            elsif (bus_a(15)='1' and bus_b(15)='1') then
+               unsigned_overflow_flag <= '1';               -- unsigned_overflow_flag recebe 1
+               
+            end if;
+            
+               
+        elsif(operation = "01") then                        -- SUB
+            ula_out <= bus_b - bus_a;                       -- ula_out recebe a subtração de bus_a com bus_b
+            
+            if(bus_a(15) = '0' AND bus_b(15) = '1') AND ula_out(15) = '1' then 
+            signed_overflow_flag <= '1';                    -- signed_overflow_flag recebe 1
+                
+            elsif (bus_a(15) = '1' AND bus_b(15) = '0') AND ula_out(15) = '0' then
+            signed_overflow_flag <= '1';                    -- signed_overflow_flag recebe 1
+            
+            elsif (bus_a(15) = '0' and bus_b(15) = '0') and (bus_a >= bus_b) then
+            unsigned_overflow_flag <= '1';                  -- unsigned_overflow_flag recebe 1
+            
+            elsif (bus_a(15) = '1' and bus_b(15) = '1') and ((not bus_a) - "1" <= (not bus_b)-1) then
+            unsigned_overflow_flag <= '1';                  -- unsigned_overflow_flag recebe 1
+            
+            elsif (bus_a(15)='1' and bus_b(15)='0') then
+            unsigned_overflow_flag <= '1';                  -- unsigned_overflow_flag recebe 1
+            
+            end if;
+            
+            
+        elsif(operation = "10") then                        -- AND    
+            ula_out <= bus_a AND bus_b;                     -- ula_out recebe a and de bus_a com bus_b
+        
+        
+        else                                                -- OR
+            ula_out <= bus_a OR bus_b;                      -- ula_out recebe a or de bus_a com bus_b 
+        
+        end if;
 
-WRITE_REG_EN : process (c_sel, data_in, ula_out)            -- processo WRITE_REG_EN
+end process ULA;
+
+
+
+C_SEL_MUX : process (c_sel, data_in, ula_out)               -- processo C_SEL_MUX
        
     begin
         
@@ -230,54 +297,10 @@ WRITE_REG_EN : process (c_sel, data_in, ula_out)            -- processo WRITE_RE
          
         end if;
         
-end process WRITE_REG_EN;
+end process C_SEL_MUX;
 
-    
-    
-ULA : process (bus_a, bus_b, operation)                     -- processo ULA 
-        
-    begin
-        
-        if(operation = "00") then                           -- SOMA
-            ula_out <= bus_a + bus_b;
-            
-            if (bus_a(15) = '0' AND bus_b(15) = '0') AND ula_out(15) = '1' then
-                signed_overflow_flag <= '1';
-                
-            elsif (bus_a(15) = '1' AND bus_b(15) = '1') AND ula_out(15) = '0' then
-                signed_overflow_flag <= '1';
-                
-            elsif (bus_a(15)='1' and bus_b(15)='1') then
-               unsigned_overflow_flag <= '1';
-               
-            end if;
-            
-               
-        elsif(operation = "01") then                        -- SUB
-            ula_out <= bus_b - bus_a;
-            
-            if(bus_a(15) = '0' AND bus_b(15) = '1') AND ula_out(15) = '1' then 
-            signed_overflow_flag <= '1';
-                
-            elsif (bus_a(15) = '1' AND bus_b(15) = '0') AND ula_out(15) = '0' then
-            signed_overflow_flag <= '1';    
-            
-            elsif (bus_a(15)='1' and bus_b(15)='0') then
-            unsigned_overflow_flag <= '1';
-            
-            end if;
-            
-            
-        elsif(operation = "10") then                        -- AND    
-            ula_out <= bus_a AND bus_b;
-        
-        
-        else
-            ula_out <= bus_a OR bus_b;                      -- OR 
-        
-        end if;
 
-end process ULA;
+
 
 end rtl;
 
