@@ -153,7 +153,8 @@ DECODE : process (instruction)                              -- processo DECODE
 
         elsif(instruction(15 downto 8) = "10000010") then   -- STORE
             decoded_instruction <= I_STORE;                 -- decoded_instruction recebe I_STORE
-            c_addr <= instruction(6 downto 5);              -- c_addr recebe os bits 6 e 5
+            a_addr <= instruction(6 downto 5);              -- a_addr recebe os bits 6 e 5
+            b_addr <= instruction(6 downto 5);              -- b_addr recebe os bits 6 e 5
             mem_addr <= instruction(4 downto 0);            -- mem_addr recebe os bits 4, 3, 2, 1 e 0
 
          elsif(instruction(15 downto 8) = "10010001") then  -- MOVE
@@ -288,7 +289,7 @@ C_SEL_MUX : process (c_sel, data_in, ula_out)               -- processo C_SEL_MU
        
     begin
         
-        if (c_sel='0') then                                 -- verifica se c_sel esta habilitado para a RAM
+        if (c_sel='1') then                                 -- verifica se c_sel esta habilitado para a RAM
             bus_c <= data_in;                               -- bus_c recebe data_in
 
         else
@@ -360,7 +361,7 @@ ADDR_SEL_MUX : process (addr_sel, program_counter, mem_addr)-- processo ADDR_SEL
     
     begin
         
-        if (addr_sel = '0') then                            -- verifica se addr_sel eh 0
+        if (addr_sel = '1') then                            -- verifica se addr_sel eh 1
             ram_addr <= mem_addr;                           -- ram_addr recebe mem_addr
         
         else

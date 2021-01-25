@@ -47,7 +47,174 @@ end control_unit;
 
 architecture rtl of control_unit is
 
+
+
+type type_state is (INICIO, DECODE, ULA, MOVE, E_BRANCH, NOP, PC);
+
+signal estado_atual : type_state;
+signal prox_estado : type_state;
+
+
+
 begin
+
+
+
+FLIP_FLOP : process(clk)                                                -- processo FLIP_FLOP
+
+    begin
+    
+        if (clk'event and clk = '1') then
+        
+            if (rst_n = '0') then
+                estado_atual <= INICIO;
+                
+            else
+                estado_atual <= prox_estado;
+            
+            end if;
+            
+        end if;
+        
+end process FLIP_FLOP;
+
+
+
+
+CALCULA_ESTADO : process(estado_atual)                             -- CALCULA_ESTADO
+
+    begin
+        
+        case estado_atual is
+	       
+	       when INICIO =>
+	           
+                ir_enable <= '1';
+                write_reg_enable <= '0';
+                c_sel <= '0';
+                flags_reg_enable <= '0';
+                branch <= '0';
+                pc_enable <= '0';
+                addr_sel <= '0';
+                ram_write_enable <= '0';
+                halt <= '0';                
+                prox_estado <= DECODE;
+            
+               
+            when DECODE =>
+            
+                ir_enable <= '0';
+                
+                case decoded_instruction is
+                
+                    when I_ADD =>
+                    
+                        operation <= "00";
+                        prox_estado <= ULA;
+                    
+                    
+                    when I_SUB =>
+                    
+                        operation <= "11";
+                        prox_estado <= ULA;
+
+
+                    when I_AND =>  
+                                      
+                        operation <= "10";
+                        prox_estado <= ULA;
+                        
+                        
+                    when I_OR =>
+                    
+                        operation <= "01";
+                        prox_estado <= ULA;
+                        
+                    
+                    when I_LOAD =>
+                        
+                        c_sel <= '1';
+                        write_reg_enable <= '1';                        
+                        prox_estado <= PC;
+                        
+                        
+                    when I_STORE =>
+                    
+                        addr_sel <= '1';    
+                        ram_write_enable <= '1';                        
+                        prox_estado <= PC;
+                            
+                            
+                    when I_MOVE =>
+                            
+                        prox_estado <= MOVE;
+                        
+                        
+                    when I_BRANCH =>
+                        
+                        prox_estado <= E_BRANCH;
+
+                    
+                    when I_BZERO =>
+                    
+                        if (zero_op = '1') then
+                            
+                            branch <= '1';                                                       
+                            prox_estado <= PC;  
+                        
+                        else
+                                                    
+                            prox_estado <= PC;
+                        
+                        end if;
+                        
+                        
+                    when I_BNEG =>
+                        
+                        if (neg_op = '1') then
+                            
+                            branch <= '1';                                                       
+                            prox_estado <= PC;  
+                        
+                        else
+                                                    
+                            prox_estado <= PC;
+                        
+                        end if;
+                    
+                    
+                    when I_NOP =>
+                    
+                            prox_estado <= NOP;
+                            
+                    
+                    when others =>
+                            halt <= '1';
+                        
+                end case;
+                
+                
+                when ULA =>
+                    
+                    flags_reg_enable <= '1';              
+                    write_reg_enable <= '1';          
+                    prox_estado <= PC;                   
+                
+                
+                when PC =>
+                    
+                    pc_enable <= '1';
+                    addr_sel <= '0';
+                    prox_estado <= INICIO;
+                     
+                    
+                    
+                
+        end case;
+
+end process CALCULA_ESTADO;
+
+
 
 end rtl;
 
