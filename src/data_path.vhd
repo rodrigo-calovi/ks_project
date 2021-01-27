@@ -46,7 +46,6 @@ entity data_path is
 end data_path;
 
 
-
 architecture rtl of data_path is
     
     -- receptores de endereco
@@ -85,7 +84,6 @@ architecture rtl of data_path is
     signal program_counter : std_logic_vector (4 downto 0);
 
 begin
-
 
 
 IR : process (clk)                                          -- processo IR
@@ -175,7 +173,6 @@ DECODE : process (instruction)                              -- processo DECODE
         elsif(instruction(15 downto 8) = "00000011") then   -- BNEG
             decoded_instruction <= I_BNEG;                  -- decoded_instruction recebe I_BZERO
             mem_addr <= instruction(4 downto 0);            -- mem_addr recebe os bits 4, 3, 2, 1 e 0
-
 
         -----------         Other Instructions:         -----------
 
