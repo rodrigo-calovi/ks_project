@@ -13,7 +13,7 @@
 -- Revision 0.01 - File Created
 --          0.02 - moving to Vivado 2017.3
 -- Additional Comments: 
--- Para avaliação de Sistemas Digitais:
+-- Para avaliacao de Sistemas Digitais:
 -- Luana Santana, Michele Liese e Rodrigo Calovi
 ----------------------------------------------------------------------------------
 library ieee;
@@ -149,11 +149,7 @@ CALCULA_ESTADO : process (estado_atual)                             -- processo 
                     when I_MOVE =>
                         
                         operation <= "00";
-<<<<<<< HEAD
                         write_reg_enable <= '1';
-=======
-                        write_reg_enable <= '1';    
->>>>>>> 5a0c345bbb43c64539ad818b09ada2db545440b6
                         prox_estado <= PC;
                         
                         
@@ -197,6 +193,7 @@ CALCULA_ESTADO : process (estado_atual)                             -- processo 
                             
                     
                     when others =>
+                    
                             halt <= '1';
                         
                 end case;
