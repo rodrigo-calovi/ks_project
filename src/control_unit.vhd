@@ -81,7 +81,7 @@ end process FLIP_FLOP;
 
 
 
-CALCULA_ESTADO : process(estado_atual)                             -- CALCULA_ESTADO
+CALCULA_ESTADO : process (estado_atual)                             -- processo CALCULA_ESTADO
 
     begin
         
@@ -149,7 +149,11 @@ CALCULA_ESTADO : process(estado_atual)                             -- CALCULA_ES
                     when I_MOVE =>
                         
                         operation <= "00";
+<<<<<<< HEAD
                         write_reg_enable <= '1';
+=======
+                        write_reg_enable <= '1';    
+>>>>>>> 5a0c345bbb43c64539ad818b09ada2db545440b6
                         prox_estado <= PC;
                         
                         
