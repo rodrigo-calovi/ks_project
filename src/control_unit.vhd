@@ -49,7 +49,7 @@ architecture rtl of control_unit is
 
 
 
-type type_state is (INICIO, DECODE, ULA, MOVE, E_BRANCH, NOP, PC);
+type type_state is (INICIO, DECODE, ULA, PC);
 
 signal estado_atual : type_state;
 signal prox_estado : type_state;
@@ -64,7 +64,7 @@ FLIP_FLOP : process(clk)                                                -- proce
 
     begin
     
-        if (clk'event and clk = '1') then
+        if (clk'event AND rising_edge(clk)) then
         
             if (rst_n = '0') then
                 estado_atual <= INICIO;
@@ -81,7 +81,7 @@ end process FLIP_FLOP;
 
 
 
-CALCULA_ESTADO : process(estado_atual)                             -- CALCULA_ESTADO
+CALCULA_ESTADO : process (estado_atual)                             -- processo CALCULA_ESTADO
 
     begin
         
@@ -109,30 +109,31 @@ CALCULA_ESTADO : process(estado_atual)                             -- CALCULA_ES
                 
                     when I_ADD =>
                     
-                        operation <= "00";
+                        operation <= "01";
                         prox_estado <= ULA;
                     
                     
                     when I_SUB =>
                     
-                        operation <= "11";
+                        operation <= "10";
                         prox_estado <= ULA;
 
 
                     when I_AND =>  
                                       
-                        operation <= "10";
+                        operation <= "11";
                         prox_estado <= ULA;
                         
                         
                     when I_OR =>
                     
-                        operation <= "01";
+                        operation <= "00";
                         prox_estado <= ULA;
                         
                     
                     when I_LOAD =>
                         
+                        addr_sel <= '1';
                         c_sel <= '1';
                         write_reg_enable <= '1';                        
                         prox_estado <= PC;
@@ -146,13 +147,16 @@ CALCULA_ESTADO : process(estado_atual)                             -- CALCULA_ES
                             
                             
                     when I_MOVE =>
-                            
-                        prox_estado <= MOVE;
+                        
+                        operation <= "00";
+                        write_reg_enable <= '1';    
+                        prox_estado <= PC;
                         
                         
                     when I_BRANCH =>
                         
-                        prox_estado <= E_BRANCH;
+                        branch <= '1';
+                        prox_estado <= PC;
 
                     
                     when I_BZERO =>
@@ -185,7 +189,7 @@ CALCULA_ESTADO : process(estado_atual)                             -- CALCULA_ES
                     
                     when I_NOP =>
                     
-                            prox_estado <= NOP;
+                            prox_estado <= PC;
                             
                     
                     when others =>
