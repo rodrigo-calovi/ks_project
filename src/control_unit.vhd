@@ -49,7 +49,7 @@ architecture rtl of control_unit is
 
 
 
-type type_state is (INICIO, DECODE, ULA, PC);
+type type_state is (INICIO, DECODE, ADD, SUB, E_AND, E_OR, LOAD, STORE, MOVE, E_BRANCH, BZERO, BNEG, NOP, E_HALT, ULA, PC);
 
 signal estado_atual : type_state;
 signal prox_estado : type_state;
@@ -108,97 +108,91 @@ CALCULA_ESTADO : process (estado_atual)                             -- processo 
                 case decoded_instruction is
                 
                     when I_ADD =>
-                    
-                        operation <= "01";
-                        prox_estado <= ULA;
+	    
+                        prox_estado <= ADD;
                     
                     
                     when I_SUB =>
                     
-                        operation <= "10";
-                        prox_estado <= ULA;
+                        prox_estado <= SUB;
 
 
                     when I_AND =>  
                                       
-                        operation <= "11";
-                        prox_estado <= ULA;
+                        prox_estado <= E_AND;
                         
                         
                     when I_OR =>
                     
-                        operation <= "00";
-                        prox_estado <= ULA;
+                        prox_estado <= E_OR;
                         
                     
                     when I_LOAD =>
-                        
-                        addr_sel <= '1';
-                        c_sel <= '1';
-                        write_reg_enable <= '1';                        
-                        prox_estado <= PC;
+                                               
+                        prox_estado <= LOAD;
                         
                         
                     when I_STORE =>
-                    
-                        addr_sel <= '1';    
-                        ram_write_enable <= '1';                        
-                        prox_estado <= PC;
+                                           
+                        prox_estado <= STORE;
                             
                             
                     when I_MOVE =>
                         
-                        operation <= "00";
-                        write_reg_enable <= '1';
-                        prox_estado <= PC;
+                        prox_estado <= MOVE;
                         
                         
                     when I_BRANCH =>
                         
-                        branch <= '1';
-                        prox_estado <= PC;
+                        prox_estado <= E_BRANCH;
 
                     
                     when I_BZERO =>
-                    
-                        if (zero_op = '1') then
-                            
-                            branch <= '1';                                                       
-                            prox_estado <= PC;  
-                        
-                        else
-                                                    
-                            prox_estado <= PC;
-                        
-                        end if;
+                                           
+		    	prox_estado <= BZERO;
                         
                         
-                    when I_BNEG =>
+                    when I_BNEG =>                        
+                                                 
+			prox_estado <= BNEG;                        
                         
-                        if (neg_op = '1') then
-                            
-                            branch <= '1';                                                       
-                            prox_estado <= PC;  
-                        
-                        else
-                                                    
-                            prox_estado <= PC;
-                        
-                        end if;
-                    
                     
                     when I_NOP =>
                     
-                            prox_estado <= PC;
+		    	prox_estado <= NOP;
                             
                     
                     when others =>
                     
-                            halt <= '1';
+		    	prox_estado <= E_HALT;
                         
                 end case;
                 
                 
+	    	when ADD =>
+                    
+                    operation <= "01";          
+                    prox_estado <= ULA;
+                
+                
+                 when SUB =>
+                    
+                    operation <= "10";          
+                    prox_estado <= ULA;
+                
+                
+                 when E_AND =>
+                    
+                    operation <= "11";          
+                    prox_estado <= ULA;
+                
+                
+                 when E_OR =>
+                    
+                    operation <= "00";          
+                    prox_estado <= ULA;
+	    
+	    
                 when ULA =>
                     
                     flags_reg_enable <= '1';              
@@ -206,15 +200,79 @@ CALCULA_ESTADO : process (estado_atual)                             -- processo 
                     prox_estado <= PC;                   
                 
                 
+	    	when LOAD =>
+                        
+                    addr_sel <= '1';
+                    c_sel <= '1';
+                    write_reg_enable <= '1';                        
+                    prox_estado <= PC;
+                        
+                        
+                when STORE =>
+                
+                    addr_sel <= '1';    
+                    ram_write_enable <= '1';                        
+                    prox_estado <= PC;
+                        
+                        
+                when MOVE =>
+                    
+                    operation <= "00";
+                    write_reg_enable <= '1';
+                    prox_estado <= PC;
+                    
+                
+                when E_BRANCH =>
+                        
+                    branch <= '1';
+                    prox_estado <= PC;
+
+                
+                when BZERO =>
+                
+                    if (zero_op = '1') then
+                        
+                        branch <= '1';                                                       
+                        prox_estado <= PC;  
+                    
+                    else
+                                                
+                        prox_estado <= PC;
+                    
+                    end if;
+                    
+                    
+                when BNEG =>
+                    
+                    if (neg_op = '1') then
+                        
+                        branch <= '1';                                                       
+                        prox_estado <= PC;  
+                    
+                    else
+                                                
+                        prox_estado <= PC;
+                    
+                    end if;
+                    
+                    
+                when NOP =>
+                    
+                    prox_estado <= PC;
+	    
+	    
                 when PC =>
                     
                     pc_enable <= '1';
                     addr_sel <= '0';
                     prox_estado <= INICIO;
+	    	
+	    	
+	    	when E_HALT =>
+                    
+                    halt <= '1';
                      
-                    
-                    
-                
+                   
         end case;
 
 end process CALCULA_ESTADO;
