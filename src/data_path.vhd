@@ -33,7 +33,6 @@ entity data_path is
     c_sel               : in  std_logic;
     operation           : in  std_logic_vector ( 1 downto 0);
     write_reg_enable    : in  std_logic;
-    ram_write_enable    : in std_logic;
     flags_reg_enable    : in  std_logic;
     decoded_instruction : out decoded_instruction_type;
     zero_op             : out std_logic;
@@ -214,11 +213,8 @@ BANCO_DE_REGISTRADORES : process (clk)                      -- processo BANCO_DE
                 when others => bus_b <= reg_3;                  -- bus_b recebe o que esta em reg_3
             end case;
             
-            if(ram_write_enable = '1') then
-            
-                data_out <= bus_a;    
-                                              -- data_out recebe o que esta em bus_a
-            end if;
+                data_out <= bus_a;                              -- data_out recebe o que esta em bus_a
+                                              
             
             if (write_reg_enable = '1') then                    -- verifica se o write_reg_enable esta¡ habilitado para acessar os registradores 
                
